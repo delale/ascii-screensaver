@@ -55,15 +55,13 @@ def display(img) -> None:
 
     Img = Image.new('RGB', (w+4, h+4), color=(0, 0, 0))
     d = ImageDraw.Draw(Img)
-    d.text((0, 0), img_str, fill=(255, 255, 255), align='left')
+    d.text((0, 0), img_str, fill=(255, 0, 0), align='left')
 
-    Img.save('result.jpg')
+    w, h = Img.size
+    r = h / w
+    Img = Img.resize((int(200*r), 200))
 
-    # s = io.BytesIO()
-    # IMG.save(s, 'png')
-    # in_memory_file = s.getvalue()
-
-    # img_data = IMG.tobitmap()
+    Img.save('result2.jpg')
 
 
 # load image
@@ -78,7 +76,7 @@ img = cv2.imread(path)
 # resize
 img_ratio = img.shape[0] / img.shape[1]
 
-img = cv2.resize(img, dsize=(100, int(100*img_ratio)),
+img = cv2.resize(img, dsize=(48, int(48*img_ratio)),
                  interpolation=cv2.INTER_NEAREST)
 
 # convert to grey-scale
