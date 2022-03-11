@@ -1,12 +1,19 @@
+from genericpath import isfile
 import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image, ImageDraw, ImageFont
+import io
 
-# grey-scale to ascii
+from pyparsing import col
 
 
 def to_ascii(pxl):
+    """
+    transform a pixel to a ascii character
+    """
+
     # def ASCII character list
     ASCII_CHAR = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
 
@@ -15,35 +22,84 @@ def to_ascii(pxl):
 
     return ASCII_CHAR[idx]
 
-# display ascii image
+
+def getSize(txt, font):
+    """
+    Get the size of the text to print
+    """
+    testImg = Image.new('RGB', (1, 1))
+    testDraw = ImageDraw.Draw(testImg)
+    return testDraw.textsize(txt, font)
 
 
 def display(img) -> None:
-    for i in range(0, img.shape[0]):
-        for j in range(0, img.shape[1]):
-            if j < (img.shape[1] - 1):
-                print(img[i, j], end='')
-            else:
-                print(img[i, j], end='\n')
+    """
+    display ascii image
+    """
+
+    # join all rows
+    img_str = np.apply_along_axis(
+        func1d=lambda x: "".join(list(x)),
+        axis=1, arr=img
+    )
+
+    # add newline at end of each row
+    img_str = "\n".join(list(img_str))
+
+    # colored text
+    CRED = '\033[91m'
+    CEND = '\033[0m'
+
+    # print
+    # print(CRED + img_str + CEND)
+
+    # display as image
+    fontname = 'arial.ttf'
+    fontsize = 11
+    font = ImageFont.truetype(fontname, fontsize)
+
+    w, h = getSize(img_str, font)
+
+    Img = Image.new('RGB', (w+4, h+4), color=(0, 0, 0))
+    d = ImageDraw.Draw(Img)
+    d.text((0, 0), img_str, fill=(255, 255, 255), align='left')
+
+    Img.save('result.jpg')
+
+    # s = io.BytesIO()
+    # IMG.save(s, 'png')
+    # in_memory_file = s.getvalue()
+
+    # img_data = IMG.tobitmap()
 
 
 # load image
 path = (input("image path: "))
+
+while not(isfile(path)):
+    print('\033[91m' + 'The file does not exist!' '\033[0m')
+    path = input('Please enter a valid path: ')
+
 img = cv2.imread(path)
 
 # resize
 img_ratio = img.shape[0] / img.shape[1]
-img = cv2.resize(img, dsize=(48, int(48*img_ratio)),
+print('Before: {}'.format(img_ratio))
+
+img = cv2.resize(img, dsize=(int(100*img_ratio), 100),
                  interpolation=cv2.INTER_NEAREST)
 
-# convert to grey-scale
-img_grey = np.mean(img, -1)
+print('After: {}'.format(img.shape[0] / img.shape[1]))
 
-# convert to ascii
-img_ascii = np.zeros_like(img_grey, dtype=object)
 
-for i in range(0, img_ascii.shape[0]):
-    for j in range(0, img_ascii.shape[1]):
-        img_ascii[i, j] = to_ascii(img_grey[i, j])
+# # convert to grey-scale
+# img_grey = np.mean(img, -1)
 
-display(img_ascii)
+# # convert to ascii
+# img_ascii = np.zeros_like(img_grey, dtype=object)
+
+# for i in range(0, img_ascii.shape[0]):
+#     for j in range(0, img_ascii.shape[1]):
+#         img_ascii[i, j] = to_ascii(img_grey[i, j])
+
+# display(img_ascii)
