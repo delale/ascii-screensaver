@@ -84,22 +84,18 @@ img = cv2.imread(path)
 
 # resize
 img_ratio = img.shape[0] / img.shape[1]
-print('Before: {}'.format(img_ratio))
 
-img = cv2.resize(img, dsize=(int(100*img_ratio), 100),
+img = cv2.resize(img, dsize=(100, int(100*img_ratio)),
                  interpolation=cv2.INTER_NEAREST)
 
-print('After: {}'.format(img.shape[0] / img.shape[1]))
+# convert to grey-scale
+img_grey = np.mean(img, -1)
 
+# convert to ascii
+img_ascii = np.zeros_like(img_grey, dtype=object)
 
-# # convert to grey-scale
-# img_grey = np.mean(img, -1)
+for i in range(0, img_ascii.shape[0]):
+    for j in range(0, img_ascii.shape[1]):
+        img_ascii[i, j] = to_ascii(img_grey[i, j])
 
-# # convert to ascii
-# img_ascii = np.zeros_like(img_grey, dtype=object)
-
-# for i in range(0, img_ascii.shape[0]):
-#     for j in range(0, img_ascii.shape[1]):
-#         img_ascii[i, j] = to_ascii(img_grey[i, j])
-
-# display(img_ascii)
+display(img_ascii)
