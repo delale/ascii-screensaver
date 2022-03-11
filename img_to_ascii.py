@@ -46,13 +46,6 @@ def display(img) -> None:
     # add newline at end of each row
     img_str = "\n".join(list(img_str))
 
-    # colored text
-    CRED = '\033[91m'
-    CEND = '\033[0m'
-
-    # print
-    # print(CRED + img_str + CEND)
-
     # display as image
     fontname = 'arial.ttf'
     fontsize = 11
