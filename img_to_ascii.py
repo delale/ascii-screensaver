@@ -1,67 +1,89 @@
 from genericpath import isfile
-import os
 import cv2
+from matplotlib.pyplot import text
 import numpy as np
-import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 import io
 
 from pyparsing import col
 
 
-def to_ascii(pxl):
-    """
-    transform a pixel to a ascii character
-    """
+class image:
+    def __init__(self, path, height) -> None:
+        """
+        Initialize image object.
 
-    # def ASCII character list
-    ASCII_CHAR = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
+        Args:
+            path: [str]: path to the chosen image
+            height: [int]: image height (after resizing)
+        """
 
-    # min max scaling pixel value to find corresponding index of ASCII_CHAR
-    idx = int((len(ASCII_CHAR)-1) * pxl / 255.0)
+        # load image
+        if not isfile(path):
+            raise FileExistsError('Incorrect path or file does not exist')
 
-    return ASCII_CHAR[idx]
+        if not type(height) == int:
+            raise ValueError(
+                'Expected type int: got type {}'.format(type(height)))
 
+        self.img = cv2.imread(path)
 
-def getSize(txt, font):
-    """
-    Get the size of the text to print
-    """
-    testImg = Image.new('RGB', (1, 1))
-    testDraw = ImageDraw.Draw(testImg)
-    return testDraw.textsize(txt, font)
+        r = self.img.shape[0] / self.img[1]  # image size ratio
 
+        # resize image
+        self.img = cv2.resize(self.img, dsize=(height, int(height * r)),
+                              interpolation=cv2.INTER_NEAREST)
 
-def display(img) -> None:
-    """
-    display ascii image
-    """
+        # grex-scale
+        self.img = np.mean(self.img, -1)
 
-    # join all rows
-    img_str = np.apply_along_axis(
-        func1d=lambda x: "".join(list(x)),
-        axis=1, arr=img
-    )
+    def to_ascii(self) -> None:
+        """
+        Converts image to ascii art.
+        """
 
-    # add newline at end of each row
-    img_str = "\n".join(list(img_str))
+        # characters to use
+        ASCII_CHAR = "B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
+        l = len(ASCII_CHAR)
 
-    # display as image
-    fontname = 'arial.ttf'
-    fontsize = 11
-    font = ImageFont.truetype(fontname, fontsize)
+        self.img_ascii = ''
+        for i in range(0, len(self.img.shape[0])):
+            self.img_ascii += [
+                ASCII_CHAR[int((l - 1) * x / 255)] for x in self.img[i]
+            ] + '\n'
 
-    w, h = getSize(img_str, font)
+    def start(self, fontname='arial.ttf', fontsize=11, height=200) -> None:
+        """
+        Create first image.
 
-    Img = Image.new('RGB', (w+4, h+4), color=(0, 0, 0))
-    d = ImageDraw.Draw(Img)
-    d.text((0, 0), img_str, fill=(255, 0, 0), align='left')
+        Args:
+            fontname: [str]: font to use for the ascii art (Default: Arial).
+            fontsize: [int]: font size.
+            height: [int]: height of final image.
+        """
 
-    w, h = Img.size
-    r = h / w
-    Img = Img.resize((int(200*r), 200))
+        # define Image Font
+        font = ImageFont.truetype(fontname, fontsize)
 
-    Img.save('result2.jpg')
+        # get measurements
+        testImg = Image.new('RGB', (1, 1))
+        testDraw = ImageDraw.Draw(testImg)
+
+        w, h = testDraw.textsize(self.img_ascii, font)
+
+        # create img
+        self.Img = Image.new(mode='RGB', size=(w+4, h+4), color=(0, 0, 0))
+        d = ImageDraw.Draw(self.Img)
+        d.text(xy=(0, 0), text=self.img_ascii,
+               fill=(255, 255, 255), align='left')
+
+        # resize
+        w, h = self.Img.size
+        r = w / h
+        self.Img = self.Img.resize((int(height*r), height))
+
+        # save image
+        self.Img.save('result.png')
 
 
 # load image
@@ -89,4 +111,10 @@ for i in range(0, img_ascii.shape[0]):
     for j in range(0, img_ascii.shape[1]):
         img_ascii[i, j] = to_ascii(img_grey[i, j])
 
-display(img_ascii)
+img_ascii2 = np.zeros_like(img_grey, dtype=np.dtype('U1'))
+
+for i in range(0, img_ascii2.shape[0]):
+    img_ascii2[i] = [
+        ASCII_CHAR[int((len(ASCII_CHAR)-1) * x / 255.0)] for x in img_grey[i]]
+
+print(np.all(img_ascii == img_ascii2))
