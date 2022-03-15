@@ -6,6 +6,6 @@
 *.exe
 
 # ignore extra direcotories and files
-.\build\*
-.\dist\*
+build/
+dist/
 *.spec
