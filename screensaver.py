@@ -64,14 +64,14 @@ class image:
                 ASCII_CHAR[int((l - 1) * x / 255)] for x in self.img[i]
             ]) + '\n'
 
-    def start(self, fontname='arial.ttf', fontsize=11, height=200):
+    def start(self, fontname='arial.ttf', fontsize=11, height=350):
         """
         Create first image.
 
         Args:
             fontname: [str]: font to use for the ascii art (Default: Arial).
             fontsize: [int]: font size.
-            height: [int]: height of final image.
+            height: [int]: height of final image (Default=350).
 
         Returns:
             PyGame image to animate.
@@ -98,7 +98,7 @@ class image:
         # resize
         w, h = self.Img.size
         self.r = w / h
-        self.Img = self.Img.resize((int(self.height*self.r), self.height))
+        self.Img = self.Img.resize((self.height, int(self.height*self.r)))
 
         # save image
         self.Img.save('result.png')
@@ -127,7 +127,7 @@ class image:
         d.text(xy=(0, 0), text=self.img_ascii,
                fill=self.color_palette[self.i], align='left')
 
-        self.Img = self.Img.resize((int(self.height*self.r), self.height))
+        self.Img = self.Img.resize((self.height, int(self.height*self.r)))
 
         self.i += 1
 
@@ -184,8 +184,10 @@ def main(img_path):
     # create rectangle
     imgRect = img.get_rect()
 
+    done = False
+
     # animate
-    while True:
+    while not done:
 
         # background color fill
         screen.fill(color=bgColor)
@@ -209,8 +211,10 @@ def main(img_path):
         pygame.display.flip()
         time.sleep(10/1000)
 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+
 
 if __name__ == '__main__':
     main(img_path='test_images/adidas.jpg')
-
-# TODO: Pygame window not focusing at beginning and freezing on any action

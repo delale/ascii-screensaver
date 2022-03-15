@@ -117,9 +117,6 @@ class image:
         # save image
         self.Img.save('result.png')
 
-        # TODO:
-        #   - PIL.Image directly to PyGame GUI?
-
 
 if __name__ == '__main__':
     path = 'test_images/adidas.jpg'
