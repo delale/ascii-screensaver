@@ -10,7 +10,7 @@ import pygame
 
 
 class image:
-    def __init__(self, path, height=48, color_palette=None) -> None:
+    def __init__(self, path, height=128, color_palette=None) -> None:
         """
         Initialize image object.
 
@@ -37,7 +37,7 @@ class image:
         r = self.img.shape[0] / self.img.shape[1]  # image size ratio
 
         # resize image
-        self.img = cv2.resize(self.img, dsize=(height, int(height * r)),
+        self.img = cv2.resize(self.img, dsize=(height, int(height * r)+1),
                               interpolation=cv2.INTER_NEAREST)
 
         # define color palette
@@ -64,7 +64,7 @@ class image:
                 ASCII_CHAR[int((l - 1) * x / 255)] for x in self.img[i]
             ]) + '\n'
 
-    def start(self, fontname='arial.ttf', fontsize=11, height=350):
+    def start(self, fontname='/Windows/Fonts/cour.ttf', fontsize=11, height=500):
         """
         Create first image.
 
@@ -98,7 +98,7 @@ class image:
         # resize
         w, h = self.Img.size
         self.r = w / h
-        self.Img = self.Img.resize((self.height, int(self.height*self.r)))
+        self.Img = self.Img.resize((self.height, int(self.height*self.r)+1))
 
         # save image
         self.Img.save('result.png')
@@ -127,7 +127,7 @@ class image:
         d.text(xy=(0, 0), text=self.img_ascii,
                fill=self.color_palette[self.i], align='left')
 
-        self.Img = self.Img.resize((self.height, int(self.height*self.r)))
+        self.Img = self.Img.resize((self.height, int(self.height*self.r)+1))
 
         self.i += 1
 
@@ -217,4 +217,4 @@ def main(img_path):
 
 
 if __name__ == '__main__':
-    main(img_path='test_images/adidas.jpg')
+    main(img_path='Big_chungus.png')
